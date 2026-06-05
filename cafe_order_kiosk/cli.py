@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from cafe_order_kiosk.models import OrderStatus
 from cafe_order_kiosk.kiosk_store import KioskStore
 from cafe_order_kiosk.utils import format_money
-
+from datetime import timezone, timedelta
 
 @dataclass
 class CLIState:
@@ -204,11 +204,14 @@ def handle_pay(store: KioskStore, state: CLIState, args: list[str]) -> None:
 
     try:
         store.pay_order(order.id, method, amount)
+        order = store.get_order(order.id)
+        
     except ValueError as exc:
         print(str(exc))
         return
 
     print(f"주문 #{order.id} 결제 완료 ({method}).")
+    save_order_to_file(order)
 
 
 def print_order(order) -> None:
@@ -261,3 +264,20 @@ def format_status(status: OrderStatus) -> str:
         OrderStatus.CANCELED: "취소",
     }
     return status_map.get(status, status.value)
+
+def save_order_to_file(order):
+    filename = "orders.txt"
+
+    with open(filename, "a", encoding="utf-8") as f:
+        f.write(f"\n===== 주문 ID: {order.id} =====\n")
+
+        korea_time = order.created_at + timedelta(hours=9)
+        formatted_time = korea_time.strftime("%Y-%m-%d %H:%M")
+
+        f.write(f"주문 시간: {formatted_time}\n")
+
+
+        for item in order.items:
+            f.write(f"{item.name} x{item.quantity} ({item.line_total}원)\n")
+
+        f.write(f"총 금액: {order.total}원\n")
