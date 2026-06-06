@@ -46,7 +46,7 @@ def run_cli() -> int:
         elif command in {"결제", "pay"}:
             handle_pay(store, state, args)
         else:
-            print("알 수 없는 명령입니다. '도움말'을 입력하세요.")
+            print("알 수 없는 명령입니다. '도움말'을 입력해서 사용 가능한 명령어를 확인하세요.")
     print("종료합니다.")
     return 0
 
@@ -103,7 +103,7 @@ def handle_order(store: KioskStore, state: CLIState, args: list[str]) -> None:
             print("선택된 주문이 없습니다. 먼저 '주문 생성'을 사용하세요.")
             return
         if len(tail) < 2:
-            print("사용법: 주문 추가 <메뉴_id> <수량> [옵션]")
+            print("잘못 입력했습니다. 메뉴 ID와 수량을 입력하시오. 예) 주문 추가 1 2")
             return
         menu_id = parse_int_arg(tail[:1], "menu_id")
         quantity = parse_int_arg(tail[1:2], "qty")
@@ -141,7 +141,7 @@ def handle_order(store: KioskStore, state: CLIState, args: list[str]) -> None:
             return
         order = store.get_order(state.current_order_id)
         if order is None:
-            print("주문을 찾을 수 없습니다.")
+            print("주문을 찾을 수 없습니다. 존재하지 않는 주문입니다.")
             return
         print_order(order)
     elif action in {"취소", "cancel"}:
@@ -155,7 +155,7 @@ def handle_order(store: KioskStore, state: CLIState, args: list[str]) -> None:
             return
         print(f"주문 #{order.id}가 취소되었습니다.")
     else:
-        print("알 수 없는 주문 명령어입니다.")
+        print("알 수 없는 주문 명령어입니다. '도움말'을 입력해서 입력 가능한 명령어를 확인하시오.")
 
 
 def handle_orders(store: KioskStore, args: list[str]) -> None:
@@ -230,12 +230,12 @@ def print_order(order) -> None:
 
 def parse_int_arg(args: list[str], name: str) -> int | None:
     if not args:
-        print(f"필수 값이 없습니다: {name}")
+        print(f"필수 값이 없습니다: {name}. 값을 입력하시오.")
         return None
     try:
         return int(args[0])
     except ValueError:
-        print(f"잘못된 값: {name}")
+        print(f"잘못된 입력을 했습니다. '{name}'에는 숫자를 입력하시오.")
         return None
 
 
