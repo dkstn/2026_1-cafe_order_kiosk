@@ -265,19 +265,22 @@ def format_status(status: OrderStatus) -> str:
     }
     return status_map.get(status, status.value)
 
+# 주문 완료 시 주문 내역을 파일로 저장하는 함수
 def save_order_to_file(order):
     filename = "orders.txt"
 
     with open(filename, "a", encoding="utf-8") as f:
         f.write(f"\n===== 주문 ID: {order.id} =====\n")
 
+        # UTC 시간을 한국 시간으로 변환하여 사용자가 보기 쉽게 처리
         korea_time = order.created_at + timedelta(hours=9)
         formatted_time = korea_time.strftime("%Y-%m-%d %H:%M")
 
         f.write(f"주문 시간: {formatted_time}\n")
 
-
+        # 주문에 포함된 각 메뉴 항목을 파일에 기록
         for item in order.items:
             f.write(f"{item.name} x{item.quantity} ({item.line_total}원)\n")
 
+        # 주문의 총 금액을 파일에 기록
         f.write(f"총 금액: {order.total}원\n")
