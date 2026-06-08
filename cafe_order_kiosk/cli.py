@@ -11,6 +11,7 @@ from cafe_order_kiosk.utils import format_money
 @dataclass
 class CLIState:
     current_order_id: int | None = None
+    discount_rate: float = 0.0 #적용된 할인율(0.1 = 10%)
 
 
 def run_cli() -> int:
@@ -45,6 +46,8 @@ def run_cli() -> int:
             handle_orders(store, args)
         elif command in {"결제", "pay"}:
             handle_pay(store, state, args)
+        elif command in {"쿠폰", "coupon"}:
+            handle_coupon(state, args)
         else:
             print("알 수 없는 명령입니다. '도움말'을 입력하세요.")
     print("종료합니다.")
@@ -200,7 +203,21 @@ def handle_pay(store: KioskStore, state: CLIState, args: list[str]) -> None:
         print("주문을 찾을 수 없습니다.")
         return
     if amount is None:
-        amount = order.total
+        total = order.total
+        # 적용된 할인율을 바탕으로 결제 금액을 계산
+        discount = int(total * state.discount_rate)
+        final_total = total - discount
+        
+        percent = int(state.discount_rate * 100)
+
+        # 원래 금액과 할인율과 할인 금액 및 할인이 적용된 최종 금액을 알려주기 위한 메세지 출력.
+        print(f"원래 금액: {total}원")
+        print(f"적용된 할인율: {percent}%")
+        print(f"할인 금액: {discount}원")
+        print(f"최종 결제 금액: {final_total}원")
+        
+        amount = total
+
 
     try:
         store.pay_order(order.id, method, amount)
@@ -209,6 +226,9 @@ def handle_pay(store: KioskStore, state: CLIState, args: list[str]) -> None:
         return
 
     print(f"주문 #{order.id} 결제 완료 ({method}).")
+
+    # 결제 후 할인율 초기화
+    state.discount_rate = 0.0
 
 
 def print_order(order) -> None:
@@ -261,3 +281,24 @@ def format_status(status: OrderStatus) -> str:
         OrderStatus.CANCELED: "취소",
     }
     return status_map.get(status, status.value)
+
+
+# 할인 쿠폰을 적용하는 함수
+def handle_coupon(state: CLIState, args: list[str]) -> None:
+    if not args:
+        print("쿠폰 코드를 입력하세요(10,20 쿠폰만 존재). 예: 쿠폰 할인10")
+        return
+
+    code = args[0]
+
+    # 할인쿠폰이 10%인 경우
+    if code == "할인10":
+        state.discount_rate = 0.1
+        print("10% 할인 쿠폰1이 적용되었습니다.")
+    #할인쿠폰이 20%인 경우
+    elif code == "할인20":
+        state.discount_rate = 0.2
+        print("20% 할인 쿠폰이 적용되었습니다.")
+    else:
+        print("유효하지 않은 쿠폰입니다.")
+
