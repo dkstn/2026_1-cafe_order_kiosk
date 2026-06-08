@@ -103,6 +103,7 @@ def handle_order(store: KioskStore, state: CLIState, args: list[str]) -> None:
             print("선택된 주문이 없습니다. 먼저 '주문 생성'을 사용하세요.")
             return
         if len(tail) < 2:
+            #주문 추가를 잘못 입력했을 경우에 예시를 통해 사용자가 더욱 알기 쉽도록 메세지 출력.
             print("잘못 입력했습니다. 메뉴 ID와 수량을 입력하시오. 예) 주문 추가 1 2")
             return
         menu_id = parse_int_arg(tail[:1], "menu_id")
@@ -155,6 +156,7 @@ def handle_order(store: KioskStore, state: CLIState, args: list[str]) -> None:
             return
         print(f"주문 #{order.id}가 취소되었습니다.")
     else:
+        # 정의되지 않은 명령어를 입력했을 시 사용자에게 안내메세지를 통해 더욱 사용하기 쉽게 메세지 출력.
         print("알 수 없는 주문 명령어입니다. '도움말'을 입력해서 입력 가능한 명령어를 확인하시오.")
 
 
@@ -235,6 +237,7 @@ def parse_int_arg(args: list[str], name: str) -> int | None:
     try:
         return int(args[0])
     except ValueError:
+        # 잘못된 입력을 알려주고 사용자가 숫자를 입력하도록 메세지 출력
         print(f"잘못된 입력을 했습니다. '{name}'에는 숫자를 입력하시오.")
         return None
 
